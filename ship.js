@@ -6,8 +6,7 @@ function createShip (pos, a, l){
     let isHit = 0;
     let hit = function(){
         this.isHit++
-        this.isSunk()
-        return this.isHit
+        return this.isHit, this.isSunk()
     };
     let isSunk = function(){
         if (this.isHit === this.length){
