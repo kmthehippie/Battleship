@@ -6,7 +6,8 @@ function createShip (pos, a, l){
     let isHit = 0;
     let hit = function(){
         this.isHit++
-        this.isSunk();
+        this.isSunk()
+        return this.isHit
     };
     let isSunk = function(){
         if (this.isHit === this.length){
@@ -20,9 +21,9 @@ function createShip (pos, a, l){
     return{ position, axis, length, isHit, hit, isSunk}
 }
 
-console.log(typeof createShip)
+
 let carrier = createShip([2,3], "x", 5)
-console.log(carrier)
+
 
 
 
