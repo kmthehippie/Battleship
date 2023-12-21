@@ -3,12 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TESTING</title>
-    <script src="gameboard.js" type="module" defer></script>
+    <title>Battle Shipping</title>
+    <script type="module" src="app.js" defer></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="player"></div>
-    <div class="gameboard"></div>
+    <div class="header">
+        Battleship Game
+    </div>
+    <div class="buttons">
+        <button class="start-btn">Start Game</button>
+        <button class="place-ships-btn inactive">Place Ships</button>
+        <button class="orientation inactive">Vertical Or Horizontal</button>
+    </div>
+    <div class="boards">
+        <div class="pBoard">
+            <div class="player-name name"></div>
+            <div class="playerBoard"></div>
+        </div>
+        <div class="cBoard">
+            <div class="computer-name name"></div>
+            <div class="computerBoard"></div>       
+        </div>
+    </div>
+    
 </body>
 </html>
