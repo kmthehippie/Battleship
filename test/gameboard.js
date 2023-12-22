@@ -1,8 +1,8 @@
 // const Coordinate = require("./coordinate.js")
 // const Ship = require("./ship.js")
 
-import { Coordinate } from "./coordinate"
-import { Ship } from "./ship"
+import { Coordinate } from "./coordinate.js"
+import { Ship } from "./ship.js"
 //this is a factory function
 export const Gameboard = function() {
     let _board = [];
@@ -11,12 +11,13 @@ export const Gameboard = function() {
     let _spawnBoard = ()=>{
         let xPos;
         let yPos;
-        for (let i = 1; i < 11; i ++){
-            for (let j = 65; j < 75; j++){
+        
+        for (let j = 65; j < 75; j++){
+            for (let i = 1; i < 11; i ++){
                 let alph = String.fromCharCode(j);
-                xPos = alph;
-                yPos = i;
-                let newCoords= new Coordinate(xPos,yPos); 
+                xPos = i;
+                yPos = alph;
+                let newCoords= new Coordinate(yPos, xPos); 
                 _board.push(newCoords)               
             }
         }       
@@ -47,22 +48,36 @@ export const Gameboard = function() {
     let _placeShip = (shipToPlace, selectedCoords, orientation)=>{
 
         let shipLength = (shipToPlace.length)
-        let indexOfSelectedCoords = findIndex(selectedCoords);
+        // let indexOfSelectedCoords = findIndex(selectedCoords);
+        
+        let shipBtns = document.querySelectorAll(".ship-btn")
 
-
-        if (orientation === "vertical") {
-            for (let i = 0; i < shipLength; i ++){
-                _board[indexOfSelectedCoords + i].hasShip = true;
-                shipToPlace.position.push(_board[indexOfSelectedCoords+i].position) 
-
+        
+        if (shipToPlace.position.length === 0){
+            if (orientation === "vertical") {
+                for (let i = 0; i < shipLength; i ++){
+                    _board[selectedCoords + (i*10)].hasShip = true;
+                    shipToPlace.position.push(_board[selectedCoords+ (i*10)].position) 
+                }
+                
+            } else if (orientation === "horizontal"){
+                for (let i = 0; i < shipLength; i ++){
+                    _board[selectedCoords + (i)].hasShip = true;
+                    shipToPlace.position.push(_board[selectedCoords+i].position) 
+    
+                }
             }
-        } else if (orientation === "horizontal"){
-            for (let i = 0; i < shipLength; i ++){
-                _board[indexOfSelectedCoords + (i*10)].hasShip = true;
-                shipToPlace.position.push(_board[indexOfSelectedCoords+(i*10)].position) 
-
-            }
+        } else if (shipToPlace.position.length !== 0){
+            shipBtns.forEach(shipBtn =>{
+                if (shipBtn.classList[1] === shipToPlace.name){
+                    shipBtn.classList.add("inactive")
+                }
+            })
         }
+
+       
+
+        
     }
 
     let _receiveAttack = (coords)=>{
