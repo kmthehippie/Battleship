@@ -49,9 +49,7 @@ export const Gameboard = function() {
 
         let shipLength = (shipToPlace.length)
         // let indexOfSelectedCoords = findIndex(selectedCoords);
-        
-        let shipBtns = document.querySelectorAll(".ship-btn")
-
+    
         
         if (shipToPlace.position.length === 0){
             if (orientation === "vertical") {
@@ -67,13 +65,7 @@ export const Gameboard = function() {
     
                 }
             }
-        } else if (shipToPlace.position.length !== 0){
-            shipBtns.forEach(shipBtn =>{
-                if (shipBtn.classList[1] === shipToPlace.name){
-                    shipBtn.classList.add("inactive")
-                }
-            })
-        }
+        } 
 
        
 
@@ -81,8 +73,7 @@ export const Gameboard = function() {
     }
 
     let _receiveAttack = (coords)=>{
-        let indexOfAttack = findIndex(coords)
-        if (_board[indexOfAttack].hasHit === true) {
+        if (_board[coords].hasHit === true) {
             //error just skip
             console.log("You can't hit somewhere you hit before")
             return
@@ -98,7 +89,7 @@ export const Gameboard = function() {
             }            
         }
         //no matter what, the coordinate has been hit. 
-        _board[indexOfAttack].hasHit = true;
+        _board[coords].hasHit = true;
 
     }
 

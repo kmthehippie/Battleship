@@ -24,7 +24,6 @@ export const player = {
                     } else {
                         player.playerBoard.placeShip(ships[i], cellNum, orientation)
                     }
-                    console.log(ships[i])
                 }
                 checking(i)
             }
@@ -40,7 +39,8 @@ export const computer = {
     computerAttacks: ()=>{
         let opponent = player.playerBoard.board
         let index = computer.randomInput()
-        opponent[index].hasHit = true     
+        opponent[index].hasHit = true  
+        return index   
     },
     computerPlaceShips: ()=>{
         // computer.computerBoard.placeShip(a,b,c)

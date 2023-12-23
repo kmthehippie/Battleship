@@ -1,4 +1,5 @@
 import { player, computer, checkPlacementValid, checkForCollision } from "./test/player.js"
+import { controller } from "./test/gamecontroller.js"
 
 let playerBoard = player.playerBoard.board;
 
@@ -11,50 +12,35 @@ const mainApp = {
     render: ()=>{
         //Populate 2 boards -- 1 for player, 1 for computer.
         const startBtn = document.querySelector(".start-btn")
-        startBtn.addEventListener("click", ()=>{        
-        mainApp.populatePBoard()
-        //populate ship options
-        const shipOpts = document.querySelector(".ship-options")
-        shipOpts.style.display = "flex";
-        mainApp.playerPlaceShips()
+        startBtn.addEventListener("click", ()=>{     
+            startBtn.classList = "inactive"   
+            
+            mainApp.populatePBoard()
+            //populate ship options
+            const shipOpts = document.querySelector(".ship-options")
+            shipOpts.style.display = "flex";
+            mainApp.playerPlaceShips()
+            mainApp.renderOrientation()            
+            mainApp.initializeGame()
 
-        mainApp.renderOrientation()
-
-         //populate computer + randomize ships positions and place them in the board. i want to move this as an event that happens after the player completes placing their ships.
-         mainApp.populateCBoard()
-         computer.computerPlaceShips()
-         mainApp.renderComputerShips();
        
-        // const shipBtn = document.querySelector(".place-ships-btn")
-        // const orientationBtn = document.querySelector(".orientation")
-        // shipBtn.classList.remove("inactive");
-        // orientationBtn.classList.remove("inactive");
-        startBtn.classList = "inactive"
+        
         })
     },
-    //here not done yet. need to click to place the ship
     playerPlaceShips: ()=>{
-        //very frustrated and stuck on this part.
-        //for now make it same as computer place ships
-        //first check the ship chosen. then place the ship 
+
         const shipBtns = document.querySelectorAll(".ship-btn")
         shipBtns.forEach(shipBtn =>{
             shipBtn.addEventListener("click", ()=>{
                 mainApp.placingShip(shipBtn)
-
-                //cause the length of ship to be determined
-                //find out what is the orientation
-                //when mouseover cells, cause hover effect for itself and the cells +1 or x10 of it.
                 
             })
         })
-        //after click carrier, click on board. if click on board and  if mouse over positions checkplacementvalid is illegal, then x it. add .carrier to the cell it is hovering. then remove if not selected
 
         
     },
     placingShip:(shipBtn)=>{
         let shipName = shipBtn.classList[1]
-        console.log(shipName)
         let playerCells = document.querySelectorAll(".cell")
         playerShips.forEach(playerShip =>{          
             if (playerShip.name === shipName){   
@@ -113,7 +99,7 @@ const mainApp = {
 
         
     },
-    //if we learn how to refactor this, it would be great. currently emptied is a copy of hovered just with the words remove instead of add...
+    //pls refactor cellEmptied, cellClicked, cellHovered
     cellEmptied:(c)=>{
         let index = Number(c.srcElement.id)
         let orient = mainApp.playerOrientation
@@ -144,9 +130,59 @@ const mainApp = {
                 }
             }  
         }
+    },
+    cellClicked: (c)=>{
+        mainApp.currentCellClicked.pop()
+        mainApp.currentCellClicked.push(Number(c.id))
+        let shipName = c.classList[2]
+        let index = Number(c.id)
+        let orient = mainApp.playerOrientation
+        let length;
+
+        //which board is being hit
+        let className = c.classList[0]
+        let splitArray = className.split("-")
+        let whichBoard = splitArray[0]
+        //here i am placing ships
+        playerShips.forEach(playerShip =>{
+            if (playerShip.name === shipName){
+                length = playerShip.length
+            }
+        })
+
         
-
-
+        
+        if (whichBoard === "player"){
+            if (index < 99 && (checkPlacementValid(orient, length, player.playerBoard.board[index].position) === true) && (checkForCollision(orient,length, player.playerBoard.board, index) === true)){
+                player.playerPlaceShips(orient, index, shipName)
+                let shipBtns = document.querySelectorAll(".ship-btn")
+                shipBtns.forEach(btn =>{
+                btn.classList.remove("active")
+                if (btn.classList[1] === shipName){
+                    btn.classList.add("inactive")
+                }
+            })
+            }
+        } else {
+            if(controller.activePlayer === "player"){
+                mainApp.attackClick(index, c)                
+                if (computer.computerBoard.allShipSunk() === false){
+                    controller.switchPlayer()
+                    mainApp.computerAttack(c)
+                    if (player.playerBoard.allShipSunk() === false){
+                        controller.switchPlayer()
+                    } else {
+                        mainApp.renderWinner("computer")
+                        console.log ("COMPUTER WINNER")
+                    }
+                }else {
+                    mainApp.renderWinner("player")
+                    console.log ("YOU ARE THE WINNER")
+                }
+    
+            }
+        }
+     
     },
     populatePBoard: ()=>{
         let width = 10;
@@ -214,43 +250,6 @@ const mainApp = {
         player();
         computer();
     },
-    
-    cellClicked: (c)=>{
-        mainApp.currentCellClicked.pop()
-        mainApp.currentCellClicked.push(Number(c.id))
-        console.log(mainApp.currentCellClicked, c.classList[2])
-        let shipName = c.classList[2]
-        let index = Number(c.id)
-        let orient = mainApp.playerOrientation
-        let length;
-        console.log(index)
-
-        playerShips.forEach(playerShip =>{
-            if (playerShip.name === shipName){
-                length = playerShip.length
-            }
-        })
-        
-        if (index < 99 && (checkPlacementValid("horizontal", length, player.playerBoard.board[index].position) === true) && (checkForCollision(orient,length, player.playerBoard.board, index) === true)){
-            player.playerPlaceShips(orient, index, shipName)
-            let shipBtns = document.querySelectorAll(".ship-btn")
-            shipBtns.forEach(btn =>{
-            btn.classList.remove("active")
-            if (btn.classList[1] === shipName){
-                btn.classList.add("inactive")
-            }
-        })
-        }
-
-        
-    
-
-        console.log(player.playerBoard.ships)
-        
-        // if placeships clicked, the cell clicked = placing the ship. need to populate on other js. if click twice = vertical or horizontal
-
-        //if placeships has been done and game has started...then each click = has hit on coordinate. change the style to active (meaning has been hit) if there is boat, show boat. if no boat, then see through
-    },
     //horizontal or vertical?
     renderOrientation: ()=>{
         let orientBtn = document.querySelector(".orientation")
@@ -260,16 +259,75 @@ const mainApp = {
                 orientBtn.classList.add("ver")
                 orientBtn.textContent = "Vertical"
                 mainApp.playerOrientation = "vertical"
-                console.log(orientBtn.classList)
             } else {
                 orientBtn.classList.remove("ver")
                 orientBtn.classList.add("hor")
                 orientBtn.textContent = "Horizontal"
                 mainApp.playerOrientation = "horizontal"
-                console.log(orientBtn.classList)
             }
            
         })
+    },
+    initializeGame: ()=>{
+        let confirmBtn = document.querySelector(".confirm")
+        let orientBtn = document.querySelector(".orientation")
+        let text = document.querySelector(".text")
+        confirmBtn.addEventListener("click", ()=>{
+        orientBtn.classList.add("inactive")
+        confirmBtn.classList.add("inactive")
+        text.classList.add("inactive")
+        //populate computer + randomize ships positions and place them in the board. i want to move this as an event that happens after the player completes placing their ships.
+         mainApp.populateCBoard()
+         computer.computerPlaceShips()
+         
+         console.log(computer.computerBoard.ships)
+
+        })
+    },
+    attackClick: (cell, c)=>{
+    //1. make coordinate has hit => receiveattack
+        let curCellOnBoard = computer.computerBoard.board[cell]
+        computer.computerBoard.receiveAttack(cell)
+        //2. make cell change color on dom
+        //if cell has ship, it must show as color on board
+        
+        c.classList.add("isHit")
+        let ships = computer.computerBoard.ships
+        //convert cell index to coordinate
+        ships.forEach(ship =>{
+            let positions = ship.position
+            for (let i = 0; i < positions.length; i ++){
+                if (ship.position[i] === curCellOnBoard.position){
+                    ship.isHit()
+                    c.classList.add(ship.name)
+                    c.textContent = "x"
+                    c.classList.remove("isHit")
+                }
+            }
+        })      
+      
+
+        
+    },
+    computerAttack: () =>{
+        let index = computer.computerAttacks()
+        let curCellOnBoard = player.playerBoard.board[index]
+        let playerBoard = document.querySelectorAll(".cell")
+        playerBoard[index].classList.add("isHit")
+        let ships = player.playerBoard.ships
+        //convert cell index to coordinate
+        ships.forEach(ship =>{
+            let positions = ship.position
+            for (let i = 0; i < positions.length; i ++){
+                if (ship.position[i] === curCellOnBoard.position){
+                    ship.isHit()
+                    playerBoard[index].textContent = "x"
+                    playerBoard[index].classList.remove("isHit")
+                }
+            }
+        })   
+
+
     },
     findIndex: (coords, _board)=>{
         for (let i = 0; i < _board.length; i ++){
@@ -278,6 +336,46 @@ const mainApp = {
             }
         }
 
+    },
+    renderWinner: (winner)=>{
+        let winnerDiv = document.querySelector(".winnerDiv")
+        if (winner === "player") {
+            winnerDiv.classList.remove("inactive")
+            let createHeader = document.createElement("h1")
+            createHeader.textContent = "CONGRATULATIONS"
+            createHeader.classList = "header"
+            let createDiv = document.createElement("div")
+            createDiv.textContent = "You Are The Winner!"
+            let createDiv2 = document.createElement("div")
+            createDiv2.textContent = "Would you like to play again?"
+            let createButton = document.createElement("button")
+            createButton.textContent = "PLAY AGAIN"
+            winnerDiv.appendChild(createHeader)
+            winnerDiv.appendChild(createDiv)
+            winnerDiv.appendChild(createDiv2)
+            winnerDiv.appendChild(createButton)
+            createButton.addEventListener("click", ()=>{
+                location.reload()
+            })
+        }else {
+            winnerDiv.classList.remove("inactive")
+            let createHeader = document.createElement("h1")
+            createHeader.textContent = "AWWW...."
+            createHeader.classList = "header"
+            let createDiv = document.createElement("div")
+            createDiv.textContent = "The Computer Won!"
+            let createDiv2 = document.createElement("div")
+            createDiv2.textContent = "Would you like to play again?"
+            let createButton = document.createElement("button")
+            createButton.textContent = "PLAY AGAIN"
+            winnerDiv.appendChild(createHeader)
+            winnerDiv.appendChild(createDiv)
+            winnerDiv.appendChild(createDiv2)
+            winnerDiv.appendChild(createButton)
+            createButton.addEventListener("click", ()=>{
+                location.reload()
+            })
+        }
     }
     
     

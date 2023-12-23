@@ -1,34 +1,14 @@
 
-import { player, computer } from "./player"
+// import { player, computer } from "./player"
 
-export const controller = function(){
-
-
-
-    //Start Game by creating player and computer boards
-    let human = player;
-    let ai = computer;
-
-
-
+export const controller = {
     //Who is the current player? Always starts with Human
-    let whichPlayer = [human, ai]
-    let activePlayer = whichPlayer[0];
-
+    whichPlayer: ["player", "computer"],
+    activePlayer: "player",
     //Switch Player function
-    const switchPlayer = () => {
-        activePlayer = activePlayer === whichPlayer[0] ? whichPlayer[1] : whichPlayer[0];
+    switchPlayer: ()=>{
+        controller.activePlayer = controller.activePlayer === controller.whichPlayer[0] ? controller.whichPlayer[1] : controller.whichPlayer[0];
     }
-
-    //If it is AI turn, computer makes attack
-    return {
-        human, ai,
-        activePlayer,
-        switchPlayer
-    }
-
-    
-
 }
 
 
