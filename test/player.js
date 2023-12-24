@@ -1,5 +1,4 @@
 // const Gb = require("./gameboard.js")
-
 import { Gameboard } from "./gameboard.js"
 
 export const player = {
@@ -9,6 +8,7 @@ export const player = {
         let index = findIndex(input, opponent)
         opponent[index].hasHit = true     
     },
+
     playerPlaceShips: (orientation, cellNum, shipName)=>{
         let ships = player.playerBoard.ships
         
@@ -36,12 +36,70 @@ export const player = {
 
 export const computer = {
     computerBoard: new Gameboard,
+    //next computer move
+    computerCurrentMove: [],
+    //all of the computer moves so far
+    computerMoves: [],
     computerAttacks: ()=>{
         let opponent = player.playerBoard.board
-        let index = computer.randomInput()
-        opponent[index].hasHit = true  
-        return index   
+        let compMovesArr = [...computer.computerMoves]
+        let arrLength = compMovesArr.length
+        let lastMove = compMovesArr [arrLength-1]
+      
+        if ((computer.computerCurrentMove.length === 0 ) && ((opponent[lastMove] === undefined) || (opponent[lastMove].hasShip === false))) {     
+            let random = computer.randomInput()
+            computer.computerCurrentMove.push(random)
+            let index = computer.computerCurrentMove[0]
+            return index
+        } 
+        
+        else if (opponent[lastMove].hasShip === true && opponent[lastMove].hasHit === true){
+            let possibleMoves = [lastMove+1, lastMove-1, lastMove+10, lastMove-10]
+            //find the legal moves
+            possibleMoves.forEach((move)=>{
+            if (move >= 0 && move < 100 && (opponent[move].hasHit === false )){
+                computer.computerCurrentMove.push(move)
+            }})
+            computer.verifyLegalMoves()
+            let index = computer.computerCurrentMove[0]
+            return index
+        } 
+        else if (computer.computerCurrentMove.length !== 0 && opponent[lastMove].hasShip === false) {
+            computer.verifyLegalMoves()
+            let index = computer.computerCurrentMove[0]
+            return index
+        }
+        
+      
+
+        
     },
+    computerHits: (index)=>{
+        let playerUI = document.querySelectorAll(".cell")
+        let opponent = player.playerBoard.board
+
+       
+
+        //add move into the array that contains all the computer moves
+        computer.computerMoves.push(index)
+        //make the playerboard at that position has hit
+        opponent[index].hasHit = true;
+        //player ui at the index at isHit to make it invis
+        playerUI[index].classList.add("isHit")
+        //empty the current computer move from the computermove array?
+        computer.computerCurrentMove.shift()
+    },
+    verifyLegalMoves: ()=>{
+        let opponent = player.playerBoard.board
+
+        computer.computerCurrentMove.forEach(move =>{
+            if (opponent[move].hasHit === false) {
+                computer.computerCurrentMove.push(move)
+            } 
+        })
+        computer.computerCurrentMove = [...new Set(computer.computerCurrentMove)]
+    },
+ 
     computerPlaceShips: ()=>{
         // computer.computerBoard.placeShip(a,b,c)
         let ships = computer.computerBoard.ships
@@ -74,6 +132,17 @@ export const computer = {
     randomInput: ()=>{
         let random = Math.floor(Math.random()*100)
         let opponent = player.playerBoard.board
+        if (computer.computerMoves !== undefined){
+            computer.computerMoves.forEach(move=>{
+                if (move === random){
+                    random = Math.floor(Math.random()*100)
+                    return random
+                }
+                else {
+                    return random
+                }
+            })
+        }       
 
         if (opponent[random].hasHit === true) {
             random = Math.floor(Math.random()*100)
@@ -86,7 +155,8 @@ export const computer = {
     randomIndex: ()=>{
         let random = Math.floor(Math.random() * 10 * 10)
         return random;
-    }
+    },
+
 
 }
 
@@ -147,7 +217,7 @@ if (orient === "vertical"){
             return true
         }
     }else if (length === 2) {
-        if(coord[1] >= 9){
+        if(coord[1] >= 10){
             return false
         }else {
             return true

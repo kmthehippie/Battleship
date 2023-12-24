@@ -6,7 +6,7 @@ let playerBoard = player.playerBoard.board;
 let playerShips = player.playerBoard.ships
 
 let computerBoard = computer.computerBoard.board;
-const mainApp = {
+export const mainApp = {
     currentCellClicked: [0],
     playerOrientation: "horizontal",
     render: ()=>{
@@ -22,18 +22,13 @@ const mainApp = {
             mainApp.playerPlaceShips()
             mainApp.renderOrientation()            
             mainApp.initializeGame()
-
-       
-        
         })
     },
     playerPlaceShips: ()=>{
-
         const shipBtns = document.querySelectorAll(".ship-btn")
         shipBtns.forEach(shipBtn =>{
             shipBtn.addEventListener("click", ()=>{
                 mainApp.placingShip(shipBtn)
-                
             })
         })
 
@@ -65,7 +60,6 @@ const mainApp = {
         })
     },
     cellHovered: (c)=>{
-
         let index = Number(c.srcElement.id)
         let orient = mainApp.playerOrientation
         let ship;
@@ -132,13 +126,14 @@ const mainApp = {
         }
     },
     cellClicked: (c)=>{
+        
         mainApp.currentCellClicked.pop()
         mainApp.currentCellClicked.push(Number(c.id))
         let shipName = c.classList[2]
         let index = Number(c.id)
         let orient = mainApp.playerOrientation
         let length;
-
+        
         //which board is being hit
         let className = c.classList[0]
         let splitArray = className.split("-")
@@ -164,24 +159,32 @@ const mainApp = {
             })
             }
         } else {
-            if(controller.activePlayer === "player"){
-                mainApp.attackClick(index, c)                
-                if (computer.computerBoard.allShipSunk() === false){
-                    controller.switchPlayer()
-                    mainApp.computerAttack(c)
-                    if (player.playerBoard.allShipSunk() === false){
-                        controller.switchPlayer()
+            
+           if (controller.activePlayer === "player"){
+                if (computer.computerBoard.board[index].hasHit === true){
+                    console.log("ERROR, please click again")
+                    return
+                } else {
+                    mainApp.attackClick(index, c)
+                    if (computer.computerBoard.allShipSunk() === true) {
+                        mainApp.renderWinner("player")
+                        console.log("YOU are the winner")
                     } else {
-                        mainApp.renderWinner("computer")
-                        console.log ("COMPUTER WINNER")
+                        controller.switchPlayer()    
+                        if(player.playerBoard.allShipSunk()=== true){
+                            mainApp.renderWinner("computer")
+                            console.log("Computer won")
+                        } else {
+                            mainApp.computerAttack(c)
+                            controller.switchPlayer()
+                        }
                     }
-                }else {
-                    mainApp.renderWinner("player")
-                    console.log ("YOU ARE THE WINNER")
-                }
+                }       
+           } 
+
     
             }
-        }
+
      
     },
     populatePBoard: ()=>{
@@ -197,7 +200,7 @@ const mainApp = {
                     createCell.classList = `player-${index} cell`
                     createCell.id = index++
                     playerBoard.appendChild(createCell)
-                    createCell.addEventListener("click", ()=>{
+                    createCell.addEventListener("click", (e)=>{
                         mainApp.cellClicked(createCell)
                     })
                     // createCell.addEventListener("mouseover", ()=>{
@@ -280,17 +283,13 @@ const mainApp = {
          mainApp.populateCBoard()
          computer.computerPlaceShips()
          
-         console.log(computer.computerBoard.ships)
 
         })
     },
     attackClick: (cell, c)=>{
-    //1. make coordinate has hit => receiveattack
         let curCellOnBoard = computer.computerBoard.board[cell]
         computer.computerBoard.receiveAttack(cell)
-        //2. make cell change color on dom
-        //if cell has ship, it must show as color on board
-        
+        curCellOnBoard.hasHit = true
         c.classList.add("isHit")
         let ships = computer.computerBoard.ships
         //convert cell index to coordinate
@@ -300,7 +299,7 @@ const mainApp = {
                 if (ship.position[i] === curCellOnBoard.position){
                     ship.isHit()
                     c.classList.add(ship.name)
-                    c.textContent = "x"
+                    c.textContent = "X"
                     c.classList.remove("isHit")
                 }
             }
@@ -311,24 +310,32 @@ const mainApp = {
     },
     computerAttack: () =>{
         let index = computer.computerAttacks()
-        let curCellOnBoard = player.playerBoard.board[index]
-        let playerBoard = document.querySelectorAll(".cell")
-        playerBoard[index].classList.add("isHit")
+        console.log(index)
+        //place the attack on both the ui and on the playerBoard
+        computer.computerHits(index)
+
+        let board = player.playerBoard.board
+        let curCellOnBoard = board[index]
+        let playerUI = document.querySelectorAll(".cell")
         let ships = player.playerBoard.ships
-        //convert cell index to coordinate
+    
+        //DOM manipulation of ships effects + ship function
         ships.forEach(ship =>{
             let positions = ship.position
             for (let i = 0; i < positions.length; i ++){
                 if (ship.position[i] === curCellOnBoard.position){
                     ship.isHit()
-                    playerBoard[index].textContent = "x"
-                    playerBoard[index].classList.remove("isHit")
+                    playerUI[index].textContent = "X"
+                    playerUI[index].classList.remove("isHit")
                 }
             }
-        })   
+        }) 
+
 
 
     },
+
+
     findIndex: (coords, _board)=>{
         for (let i = 0; i < _board.length; i ++){
             if(_board[i].position[0] === coords[0] && _board[i].position[1] === coords[1]){

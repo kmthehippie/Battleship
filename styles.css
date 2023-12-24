@@ -50,6 +50,7 @@ body{
     font-size: 60px;
     color: var(--dark);
     margin: 10px;
+    text-align: center;
 }
 .name{
     font-family: var(--main-font);

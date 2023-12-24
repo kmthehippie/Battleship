@@ -3,6 +3,7 @@
 
 import { Coordinate } from "./coordinate.js"
 import { Ship } from "./ship.js"
+
 //this is a factory function
 export const Gameboard = function() {
     let _board = [];
@@ -75,10 +76,11 @@ export const Gameboard = function() {
     let _receiveAttack = (coords)=>{
         if (_board[coords].hasHit === true) {
             //error just skip
+            
             console.log("You can't hit somewhere you hit before")
-            return
-        }
-        //find out if it hit the ship first
+            return false
+        } else {
+            //find out if it hit the ship first
         for (let i = 0; i < _ships.length; i ++){
             for (let j = 0; j < _ships[i].position.length; j++){
                 let shipsCoords = _ships[i].position
@@ -90,6 +92,8 @@ export const Gameboard = function() {
         }
         //no matter what, the coordinate has been hit. 
         _board[coords].hasHit = true;
+        }
+        
 
     }
 
